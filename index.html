@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Strike — Ultimate Tic-Tac-Toe | PvP & AI Master</title>
+    <meta name="description" content="A modern, high-aesthetic Tic-Tac-Toe game featuring Unbeatable Minimax AI, Local 2-Player multiplayer, Classic & Fading Memory modes, and synthesized audio.">
+    
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Ambient Dynamic Background Canvas -->
+    <canvas id="ambient-canvas" class="ambient-canvas" aria-hidden="true"></canvas>
+    <!-- Victory Celebration Canvas -->
+    <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+    <div class="app-container" id="app-container">
+        <!-- Header -->
+        <header class="app-header" id="app-header">
+            <div class="header-brand">
+                <div class="brand-badge">PRO EDITION</div>
+                <h1 class="brand-title">
+                    <span class="glow-cyan">NEON</span> <span class="glow-yellow">STRIKE</span>
+                </h1>
+                <p class="brand-subtitle">Tactical Tic-Tac-Toe • Multi-Mode Engine</p>
+            </div>
+            
+            <div class="header-controls">
+                <button id="btn-sound" class="btn-icon" aria-label="Toggle Sound FX" title="Toggle Sound">
+                    <svg id="sound-icon-on" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <svg id="sound-icon-off" class="icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    </svg>
+                </button>
+                <button id="btn-rules" class="btn-icon" aria-label="Game Rules & Guide" title="How to Play & Rules">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mode Selectors Section -->
+        <section class="game-config-section" aria-label="Game Configuration">
+            <!-- Opponent Selector: vs AI or 2-Player Local -->
+            <div class="config-row">
+                <div class="segmented-control" id="opponent-selector" role="radiogroup" aria-label="Opponent Mode">
+                    <button class="segmented-btn active" id="mode-pve" role="radio" aria-checked="true" data-mode="pve">
+                        <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                            <circle cx="12" cy="5" r="2"></circle>
+                            <path d="M12 7v4"></path>
+                            <line x1="8" y1="16" x2="8" y2="16"></line>
+                            <line x1="16" y1="16" x2="16" y2="16"></line>
+                        </svg>
+                        <span>vs Computer</span>
+                    </button>
+                    <button class="segmented-btn" id="mode-pvp" role="radio" aria-checked="false" data-mode="pvp">
+                        <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span>2-Player (PvP)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sub-config Row: Difficulty (for AI) & Rule Variation (Classic vs Fading Memory) -->
+            <div class="config-sub-row">
+                <!-- AI Difficulty (shown when mode is PvE) -->
+                <div class="difficulty-group" id="difficulty-group">
+                    <span class="sub-label">Difficulty:</span>
+                    <div class="chip-group" role="radiogroup" aria-label="AI Difficulty">
+                        <button class="chip-btn" id="diff-easy" data-diff="easy" role="radio" aria-checked="false">Easy</button>
+                        <button class="chip-btn" id="diff-medium" data-diff="medium" role="radio" aria-checked="false">Medium</button>
+                        <button class="chip-btn active" id="diff-hard" data-diff="hard" role="radio" aria-checked="true">Master (AI)</button>
+                    </div>
+                </div>
+
+                <!-- Rule Variant: Classic 3x3 vs Fading Memory -->
+                <div class="rule-variant-group" id="variant-group">
+                    <span class="sub-label">Rule Variant:</span>
+                    <div class="chip-group" role="radiogroup" aria-label="Rule Variant">
+                        <button class="chip-btn active" id="rule-classic" data-variant="classic" role="radio" aria-checked="true" title="Standard 3x3 game">Classic 3x3</button>
+                        <button class="chip-btn" id="rule-fading" data-variant="fading" role="radio" aria-checked="false" title="Max 3 marks per player. 4th move replaces oldest mark!">Fading Memory</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scoreboard & Status HUD -->
+        <section class="hud-section" aria-label="Scoreboard and Turn Status">
+            <!-- Player X Card -->
+            <div class="player-card player-x active" id="card-player-x">
+                <div class="player-avatar avatar-x">
+                    <span>✕</span>
+                </div>
+                <div class="player-meta">
+                    <div class="player-name-wrapper">
+                        <span class="player-name" id="name-player-x">Player 1</span>
+                    </div>
+                    <div class="player-score" id="score-player-x">0</div>
+                    <span class="player-symbol-tag tag-x">Symbol X</span>
+                </div>
+                <div class="turn-indicator-light" aria-hidden="true"></div>
+            </div>
+
+            <!-- Middle Turn / Status Pill -->
+            <div class="status-center">
+                <div class="status-pill" id="status-pill" role="status" aria-live="polite">
+                    <span class="status-indicator-dot"></span>
+                    <span class="status-text" id="status-text">Player 1's Turn</span>
+                </div>
+                <div class="tie-counter" id="tie-counter-wrapper">
+                    <span class="tie-label">DRAWS</span>
+                    <span class="tie-score" id="score-ties">0</span>
+                </div>
+            </div>
+
+            <!-- Player O Card -->
+            <div class="player-card player-o" id="card-player-o">
+                <div class="player-avatar avatar-o">
+                    <span>◯</span>
+                </div>
+                <div class="player-meta">
+                    <div class="player-name-wrapper">
+                        <span class="player-name" id="name-player-o">Computer</span>
+                    </div>
+                    <div class="player-score" id="score-player-o">0</div>
+                    <span class="player-symbol-tag tag-o">Symbol O</span>
+                </div>
+                <div class="turn-indicator-light" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <!-- Main Game Board Container -->
+        <main class="board-wrapper" id="board-wrapper">
+            <div class="board-container" id="board-container">
+                <!-- 3x3 Grid of Interactive Cells -->
+                <div class="game-board" id="game-board" role="grid" aria-label="Tic Tac Toe Board">
+                    <button class="board-cell" id="cell-0" data-index="0" role="gridcell" aria-label="Row 1, Column 1"></button>
+                    <button class="board-cell" id="cell-1" data-index="1" role="gridcell" aria-label="Row 1, Column 2"></button>
+                    <button class="board-cell" id="cell-2" data-index="2" role="gridcell" aria-label="Row 1, Column 3"></button>
+                    <button class="board-cell" id="cell-3" data-index="3" role="gridcell" aria-label="Row 2, Column 1"></button>
+                    <button class="board-cell" id="cell-4" data-index="4" role="gridcell" aria-label="Row 2, Column 2"></button>
+                    <button class="board-cell" id="cell-5" data-index="5" role="gridcell" aria-label="Row 2, Column 3"></button>
+                    <button class="board-cell" id="cell-6" data-index="6" role="gridcell" aria-label="Row 3, Column 1"></button>
+                    <button class="board-cell" id="cell-7" data-index="7" role="gridcell" aria-label="Row 3, Column 2"></button>
+                    <button class="board-cell" id="cell-8" data-index="8" role="gridcell" aria-label="Row 3, Column 3"></button>
+                </div>
+
+                <!-- SVG Winning Strike-Through Line Layer -->
+                <svg class="strike-svg" id="strike-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <line id="strike-line" class="strike-line" x1="0" y1="0" x2="0" y2="0"></line>
+                </svg>
+
+                <!-- Board Overlay Announcement (on Win / Tie) -->
+                <div class="board-banner hidden" id="board-banner">
+                    <div class="banner-content">
+                        <div class="banner-trophy" id="banner-icon">🏆</div>
+                        <h2 class="banner-title" id="banner-title">VICTORY!</h2>
+                        <p class="banner-sub" id="banner-sub">Player 1 dominates the board</p>
+                        <button class="btn-primary banner-action" id="btn-banner-rematch">
+                            <span>Play Next Round</span>
+                            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Action Bar & Shortcuts -->
+        <footer class="action-footer" id="action-footer">
+            <div class="action-buttons">
+                <button class="btn-secondary" id="btn-undo" title="Take back your last move">
+                    <svg class="btn-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 7v6h6"></path>
+                        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+                    </svg>
+                    <span>Undo</span>
+                </button>
+                <button class="btn-primary" id="btn-restart" title="Start a fresh round">
+                    <svg class="btn-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+                    </svg>
+                    <span>New Round</span>
+                </button>
+                <button class="btn-secondary" id="btn-reset-scores" title="Reset match scores to zero">
+                    <svg class="btn-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                    <span>Clear Scores</span>
+                </button>
+            </div>
+            
+            <div class="keyboard-hint" id="keyboard-hint">
+                <span>⚡ ProTip: Use Numpad 1–9 or Arrow Keys + Enter to place marks</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Rules & Guide Modal -->
+    <div class="modal-backdrop hidden" id="rules-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="modal-title" class="modal-title">Rules & Game Guide</h2>
+                <button class="modal-close-btn" id="btn-close-modal" aria-label="Close dialog">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="guide-item">
+                    <h3>🎮 Game Modes</h3>
+                    <p><strong>vs Computer:</strong> Challenge an AI equipped with 3 intellect levels — <em>Easy</em> (random & playful), <em>Medium</em> (tactical blocks), and <em>Master</em> (unbeatable Minimax game theory).</p>
+                    <p><strong>2-Player PvP:</strong> Pass and play locally with a friend on the same screen.</p>
+                </div>
+
+                <div class="guide-item">
+                    <h3>✨ Rule Variants</h3>
+                    <p><strong>Classic 3x3:</strong> The beloved standard. First player to connect 3 marks horizontally, vertically, or diagonally wins.</p>
+                    <p><strong>Fading Memory (Infinite Mode):</strong> Never tie again! Each player is allowed a maximum of 3 marks on the board. When you place your 4th mark, your oldest piece evaporates! The oldest piece pulses in warning so you can plan tactical traps.</p>
+                </div>
+
+                <div class="guide-item">
+                    <h3>⌨️ Keyboard Controls</h3>
+                    <p>Use keys <strong>1 through 9</strong> on your numeric keypad or top row to trigger the corresponding cell, or navigate using <strong>Arrow Keys</strong> and press <strong>Enter</strong> or <strong>Space</strong>.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-modal-got-it">Got it, Let's Play!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="ai.js"></script>
+    <script src="effects.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
